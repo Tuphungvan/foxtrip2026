@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: foxtrip-postgres
+    environment:
+      POSTGRES_DB: foxtrip
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - foxtrip-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:7-jammy
+    container_name: foxtrip-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: foxtrip
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - foxtrip-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: foxtrip-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - foxtrip-network
+
+  # MailHog (test email)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: foxtrip-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - foxtrip-network
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+
+networks:
+  foxtrip-network:
+    driver: bridge
