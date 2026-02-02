@@ -2,12 +2,14 @@ package com.haui.foxtrip;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.TimeZone;
 
 @SpringBootApplication
 public class FoxtripApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(FoxtripApplication.class, args);
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        SpringApplication.run(FoxtripApplication.class, args);
 	}
 
 }
