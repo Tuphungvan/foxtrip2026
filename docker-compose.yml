@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
+  # 1. Database chính
+  postgres-app:
     image: postgres:16-alpine
     container_name: foxtrip-postgres
     environment:
@@ -16,7 +16,43 @@ services:
     networks:
       - foxtrip-network
 
-  # MongoDB
+  # 2. Database riêng cho Keycloak
+  postgres-keycloak:
+    image: postgres:16-alpine
+    container_name: keycloak-postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    networks:
+      - foxtrip-network
+
+  # 3. Keycloak Server (Identity Provider)
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    container_name: foxtrip-keycloak
+    command: start-dev --features=token-exchange,admin-fine-grained-authz
+    environment:
+      # Trỏ vào container postgres-keycloak ở trên
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # Cho phép truy cập qua mạng nội bộ Docker
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-keycloak
+    networks:
+      - foxtrip-network
+
+  # 4. MongoDB
   mongodb:
     image: mongo:7-jammy
     container_name: foxtrip-mongodb
@@ -31,7 +67,7 @@ services:
     networks:
       - foxtrip-network
 
-  # Redis Cache
+  # 5. Redis Cache
   redis:
     image: redis:7-alpine
     container_name: foxtrip-redis
@@ -42,18 +78,19 @@ services:
     networks:
       - foxtrip-network
 
-  # MailHog (test email)
+  # 6. MailHog (Test gửi mail)
   mailhog:
     image: mailhog/mailhog:latest
     container_name: foxtrip-mailhog
     ports:
-      - "1025:1025"  # SMTP
-      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP Port (Cấu hình trong Spring Boot)
+      - "8025:8025"  # Web UI (Vào trình duyệt xem mail)
     networks:
       - foxtrip-network
 
 volumes:
   postgres_data:
+  keycloak_db_data: # Volume mới cho DB Keycloak
   mongodb_data:
   redis_data:
 

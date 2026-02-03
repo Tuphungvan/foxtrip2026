@@ -10,8 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,7 +37,7 @@ public class Tour extends BaseEntity {
     
     String region; // Bắc, Trung, Nam
     
-    String category; // Biển, Văn hóa, Nghỉ dưỡng
+    String category; // Biển, Văn hóa, Nghỉ dưỡng, Mạo hiểm...
     
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(columnDefinition = "text[]", nullable = false)

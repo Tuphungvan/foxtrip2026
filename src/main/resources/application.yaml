@@ -31,6 +31,7 @@ spring:
       username: admin
       password: admin
       authentication-database: admin
+      auto-index-creation: true
     redis:
       host: localhost
       port: 6379
@@ -52,51 +53,39 @@ spring:
 
   security:
     oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
-            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
-            scope: email,profile
-          facebook:
-            client-id: ${FACEBOOK_CLIENT_ID:your-facebook-client-id}
-            client-secret: ${FACEBOOK_CLIENT_SECRET:your-facebook-client-secret}
-            scope: email,public_profile
-
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/foxtrip
+          jwk-set-uri: http://localhost:8080/realms/foxtrip/protocol/openid-connect/certs
+        app:
+          keycloak:
+            server-url: http://localhost:8080
+            realm: foxtrip
+            client-id: foxtrip-backend
+            client-secret: qfeZjYBRwJRCvjR2WAtnvCJKjWcMCZIA
   servlet:
     multipart:
       max-file-size: 100MB
       max-request-size: 100MB
-
 server:
-  port: 8080
+  port: 8081
 
-# JWT
-jwt:
-  secret: qR8x2mMkPvL7wBcYdZfY3gJpS9uAeK4iXoV6nWpTyMsU=
-  access-token-expiration: 900000
-  refresh-token-expiration: 604800000
-
-# Cloudinary
 cloudinary:
   cloud-name: your-cloud-name
   api-key: your-api-key
   api-secret: your-api-secret
-
 # Actuator
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics
-
 # Swagger
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
-
 logging:
   level:
     com.haui.foxtrip: DEBUG

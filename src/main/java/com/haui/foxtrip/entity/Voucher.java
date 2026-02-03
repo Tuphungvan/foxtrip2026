@@ -1,6 +1,6 @@
 package com.haui.foxtrip.entity;
 
-import com.haui.foxtrip.enums.DiscountType;
+import com.haui.foxtrip.enums.LoaiGiam;
 import com.haui.foxtrip.enums.VoucherStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +37,7 @@ public class Voucher extends BaseEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false)
-    DiscountType discountType;
+    LoaiGiam discountType;
     
     @Column(name = "discount_value", nullable = false, precision = 15, scale = 2)
     BigDecimal discountValue;
