@@ -2,8 +2,8 @@ package com.haui.foxtrip.controller;
 
 import com.haui.foxtrip.dto.UpdateProfileRequest;
 import com.haui.foxtrip.dto.common.ApiResponse;
-import com.haui.foxtrip.entity.HoSo;
-import com.haui.foxtrip.service.HoSoService;
+import com.haui.foxtrip.entity.UserProfile;
+import com.haui.foxtrip.service.UserProfileService;
 import com.haui.foxtrip.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +15,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileController {
     
-    private final HoSoService hoSoService;
+    private final UserProfileService userProfileService;
     @GetMapping
-    public ApiResponse<HoSo> getMyProfile() {
+    public ApiResponse<UserProfile> getMyProfile() {
         UUID userId = SecurityUtils.getCurrentUserId();
-        HoSo profile = hoSoService.findByKeycloakUserId(userId);
+        UserProfile profile = userProfileService.findByKeycloakUserId(userId);
         return ApiResponse.success(profile);
     }
     @PutMapping
-    public ApiResponse<HoSo> updateMyProfile(@RequestBody UpdateProfileRequest request) {
+    public ApiResponse<UserProfile> updateMyProfile(@RequestBody UpdateProfileRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();
-        HoSo updated = hoSoService.updateProfile(userId, request);
+        UserProfile updated = userProfileService.updateProfile(userId, request);
         return ApiResponse.success(updated, "Profile updated successfully");
     }
 }

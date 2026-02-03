@@ -1,5 +1,6 @@
 package com.haui.foxtrip.document;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -10,9 +11,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Document(collection = "tin_nhan")
+@Builder
+@Document(collection = "chat_messages")
 @CompoundIndex(name = "room_date_idx", def = "{'roomId': 1, 'createdAt': -1}")
-public class TinNhan {
+public class ChatMessage {
     
     @Id
     private String id;
@@ -31,6 +33,7 @@ public class TinNhan {
     
     private List<Attachment> attachments;
     
+    @Builder.Default
     private Boolean isBotMessage = false;
     private BotContext botContext;
     
@@ -40,6 +43,7 @@ public class TinNhan {
     private LocalDateTime createdAt;
     
     @Data
+    @Builder
     public static class Attachment {
         private String type;
         private String url;
@@ -47,6 +51,7 @@ public class TinNhan {
     }
     
     @Data
+    @Builder
     public static class BotContext {
         private String intent;
         private Double confidence;

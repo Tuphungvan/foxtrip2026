@@ -1,6 +1,6 @@
 package com.haui.foxtrip.entity;
 
-import com.haui.foxtrip.enums.CacLoaiPhong;
+import com.haui.foxtrip.enums.RoomCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,11 +14,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "loai_phong", indexes = {
-    @Index(name = "idx_loai_phong_hotel", columnList = "hotel_id")
+@Table(name = "room_types", indexes = {
+    @Index(name = "idx_room_type_hotel", columnList = "hotel_id")
 })
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoaiPhong {
+public class RoomType {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,18 +29,18 @@ public class LoaiPhong {
     Hotel hotel;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "loai_phong", nullable = false)
-    CacLoaiPhong loaiPhong;  // ← SỬA: Dùng enum CacLoaiPhong
+    @Column(name = "category", nullable = false)
+    RoomCategory category;
     
-    @Column(name = "tong_so_phong", nullable = false)
-    Integer tongSoPhong;
+    @Column(name = "total_rooms", nullable = false)
+    Integer totalRooms;
     
-    @Column(name = "gia_moi_dem", nullable = false, precision = 15, scale = 2)
-    BigDecimal giaMoiDem;
+    @Column(name = "price_per_night", nullable = false, precision = 15, scale = 2)
+    BigDecimal pricePerNight;
     
-    @Column(name = "so_khach_toi_da", nullable = false)
-    Integer soKhachToiDa;
+    @Column(name = "max_guests", nullable = false)
+    Integer maxGuests;
     
     @Column(columnDefinition = "TEXT")
-    String moTa;
+    String description;
 }

@@ -1,6 +1,6 @@
 package com.haui.foxtrip.entity;
 
-import com.haui.foxtrip.enums.LoaiBan;
+import com.haui.foxtrip.enums.TableType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,11 +14,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ban_an", indexes = {
-    @Index(name = "idx_ban_restaurant", columnList = "restaurant_id")
+@Table(name = "restaurant_tables", indexes = {
+    @Index(name = "idx_table_restaurant", columnList = "restaurant_id")
 })
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BanAn {
+public class RestaurantTable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,12 +29,13 @@ public class BanAn {
     Restaurant restaurant;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "loai_ban", nullable = false)
-    LoaiBan loaiBan;
+    @Column(name = "table_type", nullable = false)
+    TableType tableType;
     
-    @Column(name = "tong_so_ban", nullable = false)
-    Integer tongSoBan;
+    @Column(name = "total_tables", nullable = false)
+    Integer totalTables;
     
-    @Column(name = "gia_dat_ban", precision = 15, scale = 2)
-    BigDecimal giaDatBan = BigDecimal.ZERO;
+    @Builder.Default
+    @Column(name = "reservation_fee", precision = 15, scale = 2)
+    BigDecimal reservationFee = BigDecimal.ZERO;
 }

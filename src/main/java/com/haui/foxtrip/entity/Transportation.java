@@ -1,7 +1,6 @@
 package com.haui.foxtrip.entity;
 
-import com.haui.foxtrip.entity.BaseEntity;
-import com.haui.foxtrip.enums.LoaiXe;
+import com.haui.foxtrip.enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -16,13 +15,13 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "phuong_tien", indexes = {
-    @Index(name = "idx_phuong_tien_slug", columnList = "slug"),
-    @Index(name = "idx_phuong_tien_loai", columnList = "loai_xe, hoat_dong"),
-    @Index(name = "idx_phuong_tien_deleted", columnList = "deleted_at")
+@Table(name = "transportations", indexes = {
+    @Index(name = "idx_transportation_slug", columnList = "slug"),
+    @Index(name = "idx_transportation_type", columnList = "vehicle_type, is_active"),
+    @Index(name = "idx_transportation_deleted", columnList = "deleted_at")
 })
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PhuongTien extends BaseEntity {
+public class Transportation extends BaseEntity {
     
     @Column(nullable = false)
     String name;
@@ -31,8 +30,8 @@ public class PhuongTien extends BaseEntity {
     String slug;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "loai_xe", nullable = false)
-    LoaiXe loaiXe;
+    @Column(name = "vehicle_type", nullable = false)
+    VehicleType vehicleType;
     
     @Column(columnDefinition = "TEXT")
     String description;
@@ -41,9 +40,10 @@ public class PhuongTien extends BaseEntity {
     @Column(columnDefinition = "text[]")
     String[] images;
     
-    @Column(name = "gia_co_ban", nullable = false, precision = 15, scale = 2)
-    BigDecimal giaCoban;
+    @Column(name = "base_price", nullable = false, precision = 15, scale = 2)
+    BigDecimal basePrice;
     
-    @Column(name = "hoat_dong")
-    Boolean hoatDong = true;
+    @Builder.Default
+    @Column(name = "is_active")
+    Boolean isActive = true;
 }

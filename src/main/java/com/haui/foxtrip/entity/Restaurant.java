@@ -61,6 +61,7 @@ public class Restaurant extends BaseEntity {
     @Column(name = "closing_time", nullable = false)
     LocalTime closingTime;
     
+    @Builder.Default
     @Column(name = "is_active")
     Boolean isActive = true;
 }

@@ -1,6 +1,7 @@
 package com.haui.foxtrip.document;
 
 import com.haui.foxtrip.enums.ItemType;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -11,9 +12,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@Builder
 @Document(collection = "reviews")
 @CompoundIndex(name = "item_date_idx", def = "{'itemType': 1, 'itemId': 1, 'createdAt': -1}")
-public class DanhGia {
+public class Review {
     
     @Id
     private String id;
@@ -44,6 +46,7 @@ public class DanhGia {
     @Indexed
     private String status; // PENDING, APPROVED, REJECTED
     
+    @Builder.Default
     private Integer helpfulCount = 0;
     
     private AdminResponse adminResponse;
@@ -54,6 +57,7 @@ public class DanhGia {
     private LocalDateTime updatedAt;
     
     @Data
+    @Builder
     public static class AdminResponse {
         private String content;
         private String respondedBy;

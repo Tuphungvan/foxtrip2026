@@ -30,11 +30,11 @@ public class GlobalExceptionHandler {
             errors.put(err.getField(), err.getDefaultMessage())
         );
         
-        ApiResponse<Map<String, String>> response = ApiResponse.error(
-            400, 
-            "Validation failed", 
-            errors
-        );
+        ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
+            .status(400)
+            .message("Validation failed")
+            .data(errors)
+            .build();
         return ResponseEntity.badRequest().body(response);
     }
     

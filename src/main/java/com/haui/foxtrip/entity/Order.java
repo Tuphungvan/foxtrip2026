@@ -37,6 +37,7 @@ public class Order extends BaseEntity {
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     BigDecimal totalAmount;
     
+    @Builder.Default
     @Column(name = "discount_amount", precision = 15, scale = 2)
     BigDecimal discountAmount = BigDecimal.ZERO;
     

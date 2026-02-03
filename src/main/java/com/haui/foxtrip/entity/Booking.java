@@ -29,7 +29,7 @@ public class Booking extends BaseEntity {
     
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id", unique = true, nullable = false)
-    ChiTiet orderItem;
+    OrderItem orderItem;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "item_type", nullable = false)

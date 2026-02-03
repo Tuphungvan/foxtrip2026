@@ -52,12 +52,15 @@ public class Hotel extends BaseEntity {
     @Column(columnDefinition = "text[]")
     String[] images;
     
+    @Builder.Default
     @Column(name = "check_in_time")
     LocalTime checkInTime = LocalTime.of(14, 0);
     
+    @Builder.Default
     @Column(name = "check_out_time")
     LocalTime checkOutTime = LocalTime.of(12, 0);
     
+    @Builder.Default
     @Column(name = "is_active")
     Boolean isActive = true;
 }

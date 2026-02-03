@@ -1,5 +1,6 @@
 package com.haui.foxtrip.document;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -10,8 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@Builder
 @Document(collection = "ai_chat_history")
-public class LichSuAI {
+public class AiChatHistory {
     
     @Id
     private String id;
@@ -32,6 +34,7 @@ public class LichSuAI {
     private LocalDateTime updatedAt;
     
     @Data
+    @Builder
     public static class Message {
         private String role; // user, assistant
         private String content;
@@ -39,6 +42,7 @@ public class LichSuAI {
     }
     
     @Data
+    @Builder
     public static class Context {
         private String intent;
         private Map<String, Object> entities;

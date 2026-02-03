@@ -1,7 +1,7 @@
 package com.haui.foxtrip.service;
 
-import com.haui.foxtrip.entity.HoSo;
-import com.haui.foxtrip.repository.HoSoRepository;
+import com.haui.foxtrip.entity.UserProfile;
+import com.haui.foxtrip.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -15,10 +15,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserSyncService {
     
-    private final HoSoRepository hoSoRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Transactional
-    public HoSo syncUserFromJwt(Jwt jwt) {
+    public UserProfile syncUserFromJwt(Jwt jwt) {
         UUID keycloakUserId = UUID.fromString(jwt.getSubject());
         String email = jwt.getClaim("email");
         String username = jwt.getClaim("preferred_username");
@@ -26,28 +26,28 @@ public class UserSyncService {
         
         log.info("Syncing user from Keycloak: userId={}, email={}", keycloakUserId, email);
         
-        // Tìm hoặc tạo mới
-        HoSo hoSo = hoSoRepository.findByKeycloakUserId(keycloakUserId)
+        // Find or create new
+        UserProfile userProfile = userProfileRepository.findByKeycloakUserId(keycloakUserId)
             .orElseGet(() -> {
                 log.info("Creating new user profile for userId={}", keycloakUserId);
-                return HoSo.builder()
+                return UserProfile.builder()
                     .keycloakUserId(keycloakUserId)
-                    .hoatDong(true)
-                    .emailXacThuc(false)
-                    .sdtXacThuc(false)
+                    .isActive(true)
+                    .emailVerified(false)
+                    .phoneVerified(false)
                     .build();
             });
         
-        // Cập nhật thông tin từ Keycloak
-        hoSo.setEmail(email);
-        hoSo.setUsername(username);
-        hoSo.setEmailXacThuc(emailVerified != null && emailVerified);
+        // Update info from Keycloak
+        userProfile.setEmail(email);
+        userProfile.setUsername(username);
+        userProfile.setEmailVerified(emailVerified != null && emailVerified);
         
-        // Nếu chưa có họ tên, dùng username
-        if (hoSo.getHoTen() == null || hoSo.getHoTen().isEmpty()) {
-            hoSo.setHoTen(username);
+        // If no full name, use username
+        if (userProfile.getFullName() == null || userProfile.getFullName().isEmpty()) {
+            userProfile.setFullName(username);
         }
         
-        return hoSoRepository.save(hoSo);
+        return userProfileRepository.save(userProfile);
     }
 }
