@@ -3,6 +3,7 @@ package com.haui.foxtrip.service;
 import com.haui.foxtrip.dto.LoginRequest;
 import com.haui.foxtrip.dto.LoginResponse;
 import com.haui.foxtrip.dto.RegisterRequest;
+import com.haui.foxtrip.dto.keycloak.KeycloakTokenResponse;
 import com.haui.foxtrip.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,15 +59,17 @@ public class KeycloakAuthService {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
         
         try {
-            ResponseEntity<LoginResponse> response = restTemplate.exchange(
+            ResponseEntity<KeycloakTokenResponse> response = restTemplate.exchange(
                 tokenUrl,
                 HttpMethod.POST,
                 entity,
-                LoginResponse.class
+                KeycloakTokenResponse.class
             );
             
             log.info("User logged in successfully: username={}", request.getUsername());
-            return response.getBody();
+            
+            // Convert Keycloak response to frontend-friendly response
+            return convertToLoginResponse(response.getBody());
             
         } catch (HttpClientErrorException e) {
             log.error("Login failed: username={}, error={}", request.getUsername(), e.getMessage());
@@ -145,14 +148,15 @@ public class KeycloakAuthService {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
         
         try {
-            ResponseEntity<LoginResponse> response = restTemplate.exchange(
+            ResponseEntity<KeycloakTokenResponse> response = restTemplate.exchange(
                 tokenUrl,
                 HttpMethod.POST,
                 entity,
-                LoginResponse.class
+                KeycloakTokenResponse.class
             );
             
-            return response.getBody();
+            // Convert Keycloak response to frontend-friendly response
+            return convertToLoginResponse(response.getBody());
             
         } catch (HttpClientErrorException e) {
             log.error("Token refresh failed: error={}", e.getMessage());
@@ -211,19 +215,31 @@ public class KeycloakAuthService {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
         
         try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            ResponseEntity<KeycloakTokenResponse> response = restTemplate.exchange(
                 tokenUrl,
                 HttpMethod.POST,
                 entity,
-                (Class<Map<String, Object>>) (Class<?>) Map.class
+                KeycloakTokenResponse.class
             );
             
-            Map<String, Object> responseBody = response.getBody();
-            return (String) responseBody.get("access_token");
+            return response.getBody().getAccessToken();
             
         } catch (HttpClientErrorException e) {
             log.error("Failed to get service account token: error={}", e.getMessage());
             throw new BadRequestException("Failed to authenticate with Keycloak");
         }
+    }
+    
+    /**
+     * Convert Keycloak token response to frontend-friendly LoginResponse
+     */
+    private LoginResponse convertToLoginResponse(KeycloakTokenResponse keycloakResponse) {
+        return LoginResponse.builder()
+                .accessToken(keycloakResponse.getAccessToken())
+                .refreshToken(keycloakResponse.getRefreshToken())
+                .tokenType(keycloakResponse.getTokenType())
+                .expiresIn(keycloakResponse.getExpiresIn())
+                .refreshExpiresIn(keycloakResponse.getRefreshExpiresIn())
+                .build();
     }
 }
