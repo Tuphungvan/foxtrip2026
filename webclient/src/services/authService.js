@@ -36,8 +36,8 @@ export const authService = {
 
   // Lấy thông tin user hiện tại
   getCurrentUser: async () => {
-    // Returns ApiResponse<UserProfile>
-    return await api.get('/auth/me');
+    // Returns ApiResponse<Map<String, Object>> with profile + roles + isAdmin + isSuperAdmin
+    return await api.get('/profile');
   },
 
   // Verify token

@@ -28,11 +28,29 @@ const Login = () => {
     setError('');
 
     try {
-      await login(formData.username, formData.password);
-      navigate('/');
+      const userData = await login(formData.username, formData.password);
+      
+      console.log('=== LOGIN DEBUG ===');
+      console.log('User data after login:', userData);
+      console.log('isAdmin:', userData?.isAdmin);
+      console.log('isSuperAdmin:', userData?.isSuperAdmin);
+      console.log('roles:', userData?.roles);
+      
+      // Alert để debug
+      alert(`Login success!\nisAdmin: ${userData?.isAdmin}\nisSuperAdmin: ${userData?.isSuperAdmin}\nRoles: ${userData?.roles?.join(', ')}`);
+      
+      // Redirect based on user role
+      if (userData && (userData.isAdmin === true || userData.isSuperAdmin === true)) {
+        console.log('✅ Redirecting to /admin');
+        alert('Redirecting to /admin');
+        navigate('/admin');
+      } else {
+        console.log('✅ Redirecting to /');
+        alert('Redirecting to /');
+        navigate('/');
+      }
     } catch (err) {
-      // err.response is axios error response
-      // After interceptor fails, error structure is preserved
+      console.error('Login error:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.';
       setError(errorMessage);
     } finally {

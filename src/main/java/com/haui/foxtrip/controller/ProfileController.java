@@ -8,6 +8,7 @@ import com.haui.foxtrip.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -16,12 +17,19 @@ import java.util.UUID;
 public class ProfileController {
     
     private final UserProfileService userProfileService;
+    
+    /**
+     * Lấy profile của user hiện tại kèm roles
+     */
     @GetMapping
-    public ApiResponse<UserProfile> getMyProfile() {
-        UUID userId = SecurityUtils.getCurrentUserId();
-        UserProfile profile = userProfileService.findByKeycloakUserId(userId);
-        return ApiResponse.success(profile);
+    public ApiResponse<Map<String, Object>> getMyProfile() {
+        Map<String, Object> profileWithRoles = userProfileService.getCurrentUserProfileWithRoles();
+        return ApiResponse.success(profileWithRoles);
     }
+    
+    /**
+     * Cập nhật profile của user hiện tại
+     */
     @PutMapping
     public ApiResponse<UserProfile> updateMyProfile(@RequestBody UpdateProfileRequest request) {
         UUID userId = SecurityUtils.getCurrentUserId();

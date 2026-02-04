@@ -1,0 +1,422 @@
+.admin-dashboard {
+  padding: 30px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.dashboard-title {
+  font-size: 3.2rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.dashboard-subtitle {
+  font-size: 1.6rem;
+  color: #666;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  color: white;
+}
+
+.stat-icon.tours {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.users {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-icon.bookings {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-icon.revenue {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-info h3 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.stat-info p {
+  font-size: 1.4rem;
+  color: #666;
+  margin: 0;
+}
+
+.stat-detail {
+  display: block;
+  font-size: 1.2rem;
+  color: #999;
+  margin-top: 5px;
+}
+
+.stat-link {
+  display: inline-block;
+  font-size: 1.3rem;
+  color: #667eea;
+  text-decoration: none;
+  margin-top: 5px;
+  transition: color 0.3s;
+}
+
+.stat-link:hover {
+  color: #764ba2;
+}
+
+/* Dashboard Sections */
+.dashboard-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 25px;
+}
+
+.section-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-card h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-card h2 i {
+  color: #667eea;
+}
+
+/* Tours Table */
+.tours-table {
+  overflow-x: auto;
+}
+
+.tours-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tours-table th {
+  text-align: left;
+  padding: 12px;
+  background: #f8f9fa;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tours-table td {
+  padding: 15px 12px;
+  font-size: 1.4rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tour-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tour-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.slots {
+  padding: 4px 10px;
+  background: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.slots.full {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.btn-icon:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state i {
+  font-size: 6rem;
+  color: #ddd;
+  margin-bottom: 20px;
+}
+
+.empty-state p {
+  font-size: 1.6rem;
+  color: #999;
+  margin-bottom: 20px;
+}
+
+/* Quick Stats */
+.quick-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.quick-stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.quick-stat-item:last-child {
+  border-bottom: none;
+}
+
+.quick-stat-item .label {
+  font-size: 1.4rem;
+  color: #666;
+}
+
+.quick-stat-item .value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Admin Tools */
+.admin-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tool-link {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.3s;
+}
+
+.tool-link:hover {
+  background: #667eea;
+  color: white;
+  transform: translateX(5px);
+}
+
+.tool-link i {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.tool-link span {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.tool-link small {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: #ffa500;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #ff8c00;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 20px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .dashboard-title {
+    font-size: 2.4rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .tours-table {
+    font-size: 1.2rem;
+  }
+
+  .tour-thumb {
+    width: 40px;
+    height: 40px;
+  }
+}

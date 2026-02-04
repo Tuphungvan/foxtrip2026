@@ -113,3 +113,23 @@
     display: none;
   }
 }
+
+.btn-admin {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.4rem;
+  background: #6c757d;
+  color: var(--white-color);
+  border: none;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.btn-admin:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}

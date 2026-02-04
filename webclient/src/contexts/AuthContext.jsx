@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     const userResponse = await authService.getCurrentUser();
     // userResponse is ApiResponse<UserProfile>
     setUser(userResponse.data);
-    return apiResponse;
+    return userResponse.data; // Return user data for redirect logic
   };
 
   const register = async (userData) => {

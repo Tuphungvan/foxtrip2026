@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop  # Tạo lại tables mỗi lần restart (dev only)
+      ddl-auto: update  # Tạo/cập nhật tables, KHÔNG xóa khi stop
     show-sql: true
     properties:
       hibernate:
@@ -71,9 +71,9 @@ server:
   port: 8081
 
 cloudinary:
-  cloud-name: your-cloud-name
-  api-key: your-api-key
-  api-secret: your-api-secret
+  cloud-name: dxqfvuf6x
+  api-key: 969367144844572
+  api-secret: abV5gq8JHvD4sG9j75tbkjK0JE0
 # Actuator
 management:
   endpoints:

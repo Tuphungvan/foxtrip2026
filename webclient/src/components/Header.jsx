@@ -29,6 +29,11 @@ const Header = () => {
         <div className="header-actions">
           {isAuthenticated ? (
             <>
+              {(user?.isAdmin === true || user?.roles?.includes('ADMIN') || user?.roles?.includes('SUPER_ADMIN')) && (
+                <Link to="/admin/dashboard" className="btn btn-admin">
+                  <i className="fas fa-cog"></i> Admin
+                </Link>
+              )}
               <Link to="/profile" className="user-link">
                 <i className="fas fa-user"></i>
                 <span>{user?.fullName || user?.username}</span>

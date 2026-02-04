@@ -40,14 +40,10 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers(
                     "/api/public/**",
-                    "/api/tours",
-                    "/api/tours/{id}",
-                    "/api/hotels",
-                    "/api/hotels/{id}",
-                    "/api/restaurants",
-                    "/api/restaurants/{id}",
-                    "/api/transportation",
-                    "/api/transportation/{id}",
+                    "/api/tours/**",
+                    "/api/hotels/**",
+                    "/api/restaurants/**",
+                    "/api/transportation/**",
                     "/api/auth/**"
                 ).permitAll()
                 

@@ -55,12 +55,24 @@ public class SecurityUtils {
     
     /**
      * Lấy danh sách roles từ JWT token
+     * Roles có thể nằm ở realm_access hoặc resource_access
      */
     @SuppressWarnings("unchecked")
     public static List<String> getCurrentUserRoles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            // Try resource_access first (client-specific roles)
+            Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+            if (resourceAccess != null) {
+                // Try foxtrip-backend client
+                Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get("foxtrip-backend");
+                if (clientAccess != null && clientAccess.containsKey("roles")) {
+                    return (List<String>) clientAccess.get("roles");
+                }
+            }
+            
+            // Fallback to realm_access
             Map<String, Object> realmAccess = jwt.getClaim("realm_access");
             if (realmAccess != null && realmAccess.containsKey("roles")) {
                 return (List<String>) realmAccess.get("roles");
@@ -82,6 +94,30 @@ public class SecurityUtils {
      */
     public static boolean isAdmin() {
         return hasRole("ADMIN") || hasRole("SUPER_ADMIN");
+    }
+    
+    /**
+     * Kiểm tra user có phải Super Admin không
+     */
+    public static boolean isSuperAdmin() {
+        return hasRole("SUPER_ADMIN");
+    }
+    
+    /**
+     * Kiểm tra user có role hoặc cao hơn không
+     * Ví dụ: hasRoleOrHigher("ADMIN") → true nếu có ADMIN hoặc SUPER_ADMIN
+     */
+    public static boolean hasRoleOrHigher(String role) {
+        if ("SUPER_ADMIN".equals(role)) {
+            return hasRole("SUPER_ADMIN");
+        }
+        if ("ADMIN".equals(role)) {
+            return hasRole("ADMIN") || hasRole("SUPER_ADMIN");
+        }
+        if ("USER".equals(role)) {
+            return hasRole("USER") || hasRole("ADMIN") || hasRole("SUPER_ADMIN");
+        }
+        return false;
     }
     
     /**
