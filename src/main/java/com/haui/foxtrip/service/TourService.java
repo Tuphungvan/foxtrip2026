@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -211,20 +212,19 @@ public class TourService {
         return tourRepository.findBookableTours(pageable)
                 .map(tourMapper::toResponseDTO);
     }
-    
+
     /**
-     * Tìm kiếm tour
-     */
-    /**
-     * Tìm kiếm tour theo tên hoặc mô tả
+     * Tìm kiếm tour theo tên
      * - Hỗ trợ tìm kiếm không dấu (Đà Nẵng = Da Nang)
      * - Hỗ trợ tìm kiếm gần đúng (fuzzy matching với độ tương tự >= 60%)
+     * - Nếu keyword rỗng, trả danh sách tất cả tour
      * - Sắp xếp theo độ phù hợp
      */
     @Transactional(readOnly = true)
     public Page<TourResponseDTO> searchTours(String keyword, Pageable pageable) {
+        // Nếu keyword rỗng, trả tất cả tour
         if (keyword == null || keyword.trim().isEmpty()) {
-            return Page.empty(pageable);
+            return getAllTours(pageable);
         }
 
         String normalizedKeyword = SearchUtil.normalizeKeyword(keyword);
@@ -232,45 +232,45 @@ public class TourService {
 
         List<Tour> candidates = tourRepository.findAllActiveList();
 
-        List<java.util.Map.Entry<Integer, TourResponseDTO>> scored = new java.util.ArrayList<>();
+        List<Map.Entry<Integer, TourResponseDTO>> scored = new ArrayList<>();
 
         for (Tour t : candidates) {
             int totalScore = 0;
             boolean allMatched = true;
 
+            // Tìm kiếm chỉ theo tên (bỏ description)
             for (String token : tokens) {
                 int nameScore = SearchUtil.scoreMatch(t.getName(), token);
-                int descScore = SearchUtil.scoreMatch(t.getDescription(), token);
-                // ưu tiên match trên tên (weight 2)
-                int best = Math.max(nameScore * 2, descScore);
-                if (best == 0) {
+                if (nameScore == 0) {
                     allMatched = false;
                     break;
                 }
-                totalScore += best;
+                totalScore += nameScore;
             }
 
             if (allMatched) {
-                scored.add(new java.util.AbstractMap.SimpleEntry<>(totalScore, tourMapper.toResponseDTO(t)));
+                scored.add(new AbstractMap.SimpleEntry<>(totalScore, tourMapper.toResponseDTO(t)));
             }
         }
 
         // sort giảm dần theo điểm
-        scored.sort((a, b) -> Integer.compare(b.getKey(), a.getKey()));
+        scored.sort((a, b)
+                -> Integer.compare(b.getKey(), a.getKey()));
 
         // pagination
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), scored.size());
         if (start >= scored.size()) {
-            return new PageImpl<>(java.util.Collections.emptyList(), pageable, scored.size());
+            return new PageImpl<>(Collections.emptyList(), pageable, scored.size());
         }
 
         List<TourResponseDTO> pageContent = scored.subList(start, end)
-                .stream().map(java.util.Map.Entry::getValue).collect(java.util.stream.Collectors.toList());
+                .stream()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(pageContent, pageable, scored.size());
     }
-    
     // Helper methods
     
     private void validateTourDates(LocalDate startDate, LocalDate endDate) {
