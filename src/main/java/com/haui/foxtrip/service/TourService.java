@@ -227,44 +227,48 @@ public class TourService {
             return Page.empty(pageable);
         }
 
-        // Normalize keyword
         String normalizedKeyword = SearchUtil.normalizeKeyword(keyword);
+        String[] tokens = normalizedKeyword.split("\\s+");
 
-        // Lấy danh sách tour từ DB (basic filter)
-        List<Tour> tours = tourRepository.searchToursAdvanced(normalizedKeyword);
+        List<Tour> candidates = tourRepository.findAllActiveList();
 
-        // Xếp hạng kết quả dựa trên độ phù hợp
-        List<TourResponseDTO> rankedResults = tours.stream()
-                .map(tour -> {
-                    int nameScore = SearchUtil.scoreMatch(tour.getName(), keyword);
-                    int descScore = SearchUtil.scoreMatch(tour.getDescription(), keyword);
-                    int maxScore = Math.max(nameScore, descScore);
+        List<java.util.Map.Entry<Integer, TourResponseDTO>> scored = new java.util.ArrayList<>();
 
-                    return new AbstractMap.SimpleEntry<>(maxScore, tourMapper.toResponseDTO(tour));
-                })
-                .filter(entry -> entry.getKey() > 0) // Lọc kết quả có score > 0
-                .sorted((a, b) -> Integer.compare(b.getKey(), a.getKey())) // Sắp xếp giảm dần
-                .map(AbstractMap.SimpleEntry::getValue)
-                .collect(java.util.stream.Collectors.toList());
+        for (Tour t : candidates) {
+            int totalScore = 0;
+            boolean allMatched = true;
 
-        // Áp dụng pagination trên kết quả đã xếp hạng
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), rankedResults.size());
+            for (String token : tokens) {
+                int nameScore = SearchUtil.scoreMatch(t.getName(), token);
+                int descScore = SearchUtil.scoreMatch(t.getDescription(), token);
+                // ưu tiên match trên tên (weight 2)
+                int best = Math.max(nameScore * 2, descScore);
+                if (best == 0) {
+                    allMatched = false;
+                    break;
+                }
+                totalScore += best;
+            }
 
-        if (start >= rankedResults.size()) {
-            return new PageImpl<>(
-                    java.util.Collections.emptyList(),
-                    pageable,
-                    rankedResults.size()
-            );
+            if (allMatched) {
+                scored.add(new java.util.AbstractMap.SimpleEntry<>(totalScore, tourMapper.toResponseDTO(t)));
+            }
         }
 
-        List<TourResponseDTO> pageContent = rankedResults.subList(start, end);
-        return new PageImpl<>(
-                pageContent,
-                pageable,
-                rankedResults.size()
-        );
+        // sort giảm dần theo điểm
+        scored.sort((a, b) -> Integer.compare(b.getKey(), a.getKey()));
+
+        // pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), scored.size());
+        if (start >= scored.size()) {
+            return new PageImpl<>(java.util.Collections.emptyList(), pageable, scored.size());
+        }
+
+        List<TourResponseDTO> pageContent = scored.subList(start, end)
+                .stream().map(java.util.Map.Entry::getValue).collect(java.util.stream.Collectors.toList());
+
+        return new PageImpl<>(pageContent, pageable, scored.size());
     }
     
     // Helper methods
