@@ -34,7 +34,7 @@ public class CloudinaryService {
             String publicId = tourName.replaceAll("\\s+", "_") + "_" + 
                             System.currentTimeMillis() + "_" + 
                             generateRandomString();
-            
+
             Map<String, Object> uploadParams = ObjectUtils.asMap(
                 "folder", folder,
                 "public_id", publicId,
@@ -44,11 +44,11 @@ public class CloudinaryService {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
             String imageUrl = (String) uploadResult.get("secure_url");
             
-            log.info("✅ Uploaded image: {}", imageUrl);
+            log.info(" Uploaded image: {}", imageUrl);
             return imageUrl;
             
         } catch (IOException e) {
-            log.error("❌ Error uploading image to Cloudinary", e);
+            log.error(" Error uploading image to Cloudinary", e);
             throw new BadRequestException("Không thể upload ảnh: " + e.getMessage());
         }
     }
@@ -74,10 +74,10 @@ public class CloudinaryService {
         try {
             String publicId = extractPublicId(imageUrl);
             Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-            log.info("🗑️ Deleted image: {} - Result: {}", publicId, result.get("result"));
+            log.info(" Deleted image: {} - Result: {}", publicId, result.get("result"));
             
         } catch (Exception e) {
-            log.error("❌ Error deleting image from Cloudinary: {}", imageUrl, e);
+            log.error(" Error deleting image from Cloudinary: {}", imageUrl, e);
             throw new BadRequestException("Không thể xóa ảnh: " + e.getMessage());
         }
     }
@@ -89,14 +89,14 @@ public class CloudinaryService {
         try {
             String prefix = "tours/" + tourName.replaceAll("\\s+", "_");
             Map result = cloudinary.api().deleteResourcesByPrefix(prefix, ObjectUtils.emptyMap());
-            log.info("🗑️ Deleted all images for tour '{}': {}", tourName, result.get("deleted"));
+            log.info(" Deleted all images for tour '{}': {}", tourName, result.get("deleted"));
             
             // Xóa folder
             cloudinary.api().deleteFolder(prefix, ObjectUtils.emptyMap());
-            log.info("🗑️ Deleted folder: {}", prefix);
+            log.info(" Deleted folder: {}", prefix);
             
         } catch (Exception e) {
-            log.error("❌ Error deleting tour images: {}", tourName, e);
+            log.error(" Error deleting tour images: {}", tourName, e);
         }
     }
     

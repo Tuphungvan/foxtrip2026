@@ -10,9 +10,11 @@ import com.haui.foxtrip.exception.BadRequestException;
 import com.haui.foxtrip.exception.ResourceNotFoundException;
 import com.haui.foxtrip.mapper.TourMapper;
 import com.haui.foxtrip.repository.TourRepository;
+import com.haui.foxtrip.util.SearchUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class TourService {
     private final CloudinaryService cloudinaryService;
     private final Slugify slugify = Slugify.builder().build();
     private final Random random = new Random();
-    
+
     /**
      * Tạo tour mới với ảnh
      */
@@ -65,7 +64,7 @@ public class TourService {
         
         // Lưu vào DB
         Tour savedTour = tourRepository.save(tour);
-        log.info("✅ Created tour: {} with {} images", savedTour.getName(), imageUrls.size());
+        log.info("Created tour: {} with {} images", savedTour.getName(), imageUrls.size());
         
         return tourMapper.toResponseDTO(savedTour);
     }
@@ -128,7 +127,7 @@ public class TourService {
         }
         
         Tour updatedTour = tourRepository.save(tour);
-        log.info("✅ Updated tour: {}", updatedTour.getName());
+        log.info("Updated tour: {}", updatedTour.getName());
         
         return tourMapper.toResponseDTO(updatedTour);
     }
@@ -148,7 +147,7 @@ public class TourService {
         // Xóa ảnh trên Cloudinary
         cloudinaryService.deleteAllTourImages(tour.getName());
         
-        log.info("🗑️ Deleted tour: {}", tour.getName());
+        log.info(" Deleted tour: {}", tour.getName());
     }
     
     /**
@@ -216,10 +215,56 @@ public class TourService {
     /**
      * Tìm kiếm tour
      */
+    /**
+     * Tìm kiếm tour theo tên hoặc mô tả
+     * - Hỗ trợ tìm kiếm không dấu (Đà Nẵng = Da Nang)
+     * - Hỗ trợ tìm kiếm gần đúng (fuzzy matching với độ tương tự >= 60%)
+     * - Sắp xếp theo độ phù hợp
+     */
     @Transactional(readOnly = true)
     public Page<TourResponseDTO> searchTours(String keyword, Pageable pageable) {
-        return tourRepository.searchTours(keyword, pageable)
-                .map(tourMapper::toResponseDTO);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Normalize keyword
+        String normalizedKeyword = SearchUtil.normalizeKeyword(keyword);
+
+        // Lấy danh sách tour từ DB (basic filter)
+        List<Tour> tours = tourRepository.searchToursAdvanced(normalizedKeyword);
+
+        // Xếp hạng kết quả dựa trên độ phù hợp
+        List<TourResponseDTO> rankedResults = tours.stream()
+                .map(tour -> {
+                    int nameScore = SearchUtil.scoreMatch(tour.getName(), keyword);
+                    int descScore = SearchUtil.scoreMatch(tour.getDescription(), keyword);
+                    int maxScore = Math.max(nameScore, descScore);
+
+                    return new AbstractMap.SimpleEntry<>(maxScore, tourMapper.toResponseDTO(tour));
+                })
+                .filter(entry -> entry.getKey() > 0) // Lọc kết quả có score > 0
+                .sorted((a, b) -> Integer.compare(b.getKey(), a.getKey())) // Sắp xếp giảm dần
+                .map(AbstractMap.SimpleEntry::getValue)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Áp dụng pagination trên kết quả đã xếp hạng
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), rankedResults.size());
+
+        if (start >= rankedResults.size()) {
+            return new PageImpl<>(
+                    java.util.Collections.emptyList(),
+                    pageable,
+                    rankedResults.size()
+            );
+        }
+
+        List<TourResponseDTO> pageContent = rankedResults.subList(start, end);
+        return new PageImpl<>(
+                pageContent,
+                pageable,
+                rankedResults.size()
+        );
     }
     
     // Helper methods

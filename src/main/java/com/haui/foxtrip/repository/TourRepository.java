@@ -59,4 +59,8 @@ public interface TourRepository extends JpaRepository<Tour, UUID> {
     // Tìm kiếm tour theo tên hoặc mô tả
     @Query("SELECT t FROM Tour t WHERE (LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND t.deletedAt IS NULL")
     Page<Tour> searchTours(@Param("keyword") String keyword, Pageable pageable);
+
+    // Tìm kiếm tour theo tên hoặc mô tả (không dấu, fuzzy)
+    @Query("SELECT t FROM Tour t WHERE (LOWER(t.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND t.isBookable = true AND t.deletedAt IS NULL")
+    List<Tour> searchToursAdvanced(@Param("keyword") String keyword);
 }
