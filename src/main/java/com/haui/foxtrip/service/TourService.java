@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class TourService {
-    
+
     private final TourRepository tourRepository;
     private final TourMapper tourMapper;
     private final CloudinaryService cloudinaryService;
@@ -43,33 +43,37 @@ public class TourService {
     public TourResponseDTO createTour(TourRequestDTO requestDTO, List<MultipartFile> imageFiles) {
         // Validate
         validateTourDates(requestDTO.getStartDate(), requestDTO.getEndDate());
-        
+
         if (imageFiles == null || imageFiles.isEmpty()) {
             throw new BadRequestException("Tour phải có ít nhất 1 ảnh");
         }
-        
-        // Upload ảnh lên Cloudinary
-        List<String> imageUrls = cloudinaryService.uploadImages(imageFiles, requestDTO.getName());
-        
-        // Tạo entity
-        Tour tour = tourMapper.toEntity(requestDTO);
-        tour.setImages(imageUrls.toArray(new String[0]));
-        tour.setAvailableSlots(requestDTO.getSlots());
-        
-        // Generate slug
-        tour.setSlug(slugify.slugify(requestDTO.getName()));
-        
-        if (tour.getIsBookable() == null) {
-            tour.setIsBookable(true);
+
+        try {
+            // Upload ảnh lên Cloudinary
+            List<String> imageUrls = cloudinaryService.uploadImages(imageFiles, requestDTO.getName());
+
+            // Tạo entity
+            Tour tour = tourMapper.toEntity(requestDTO);
+            tour.setImages(imageUrls.toArray(new String[0]));
+            tour.setAvailableSlots(requestDTO.getSlots());
+
+            // Generate slug
+            tour.setSlug(slugify.slugify(requestDTO.getName()));
+
+            if (tour.getIsBookable() == null) {
+                tour.setIsBookable(true);
+            }
+
+            // Lưu vào DB
+            Tour savedTour = tourRepository.save(tour);
+            log.info("Created tour: {} with {} images", savedTour.getName(), imageUrls.size());
+            return tourMapper.toResponseDTO(savedTour);
+        } catch (Exception e) {
+            log.error("❌ Error uploading images for tour: {}", requestDTO.getName(), e);
+            throw new BadRequestException("Lỗi upload ảnh: " + e.getMessage());
         }
-        
-        // Lưu vào DB
-        Tour savedTour = tourRepository.save(tour);
-        log.info("Created tour: {} with {} images", savedTour.getName(), imageUrls.size());
-        
-        return tourMapper.toResponseDTO(savedTour);
     }
-    
+
     /**
      * Lấy tất cả tour (có phân trang)
      */
@@ -78,7 +82,7 @@ public class TourService {
         return tourRepository.findAllActive(pageable)
                 .map(tourMapper::toResponseDTO);
     }
-    
+
     /**
      * Lấy tour theo ID
      */
@@ -88,7 +92,7 @@ public class TourService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tour với ID: " + id));
         return tourMapper.toResponseDTO(tour);
     }
-    
+
     /**
      * Lấy tour theo slug
      */
@@ -98,7 +102,7 @@ public class TourService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tour với slug: " + slug));
         return tourMapper.toResponseDTO(tour);
     }
-    
+
     /**
      * Cập nhật tour
      */
@@ -106,33 +110,33 @@ public class TourService {
     public TourResponseDTO updateTour(UUID id, TourUpdateDTO updateDTO, List<MultipartFile> newImages) {
         Tour tour = tourRepository.findByIdActive(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tour với ID: " + id));
-        
+
         // Validate dates nếu có update
         if (updateDTO.getStartDate() != null && updateDTO.getEndDate() != null) {
             validateTourDates(updateDTO.getStartDate(), updateDTO.getEndDate());
         }
-        
+
         // Update thông tin cơ bản
         tourMapper.updateEntityFromDTO(updateDTO, tour);
-        
+
         // Upload ảnh mới nếu có
         if (newImages != null && !newImages.isEmpty()) {
             // Xóa ảnh cũ
             if (tour.getImages() != null && tour.getImages().length > 0) {
                 cloudinaryService.deleteImages(Arrays.asList(tour.getImages()));
             }
-            
+
             // Upload ảnh mới
             List<String> imageUrls = cloudinaryService.uploadImages(newImages, tour.getName());
             tour.setImages(imageUrls.toArray(new String[0]));
         }
-        
+
         Tour updatedTour = tourRepository.save(tour);
         log.info("Updated tour: {}", updatedTour.getName());
-        
+
         return tourMapper.toResponseDTO(updatedTour);
     }
-    
+
     /**
      * Xóa tour (soft delete)
      */
@@ -140,17 +144,21 @@ public class TourService {
     public void deleteTour(UUID id) {
         Tour tour = tourRepository.findByIdActive(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tour với ID: " + id));
-        
+
         // Soft delete
         tour.setDeletedAt(LocalDateTime.now());
         tourRepository.save(tour);
-        
-        // Xóa ảnh trên Cloudinary
-        cloudinaryService.deleteAllTourImages(tour.getName());
-        
-        log.info(" Deleted tour: {}", tour.getName());
+
+        try {
+            cloudinaryService.deleteAllTourImages(tour.getName());
+            log.info("✅ Deleted tour: {} (ID: {})", tour.getName(), tour.getId());
+        } catch (Exception e) {
+            log.warn("⚠️ Failed to delete CloudinaryImages for tour: {} (ID: {}). Manual cleanup may be needed",
+                    tour.getName(), tour.getId(), e);
+            // Có thể ghi vào queue/log để admin cleanup sau
+        }
     }
-    
+
     /**
      * Lấy danh sách tour shorts
      */
@@ -159,24 +167,24 @@ public class TourService {
         List<Tour> tours = tourRepository.findAllWithShortUrl();
         return tourMapper.toShortDTOList(tours);
     }
-    
+
     /**
      * Lấy một tour short ngẫu nhiên
      */
     @Transactional(readOnly = true)
     public TourShortDTO getRandomTourShort() {
         long count = tourRepository.countToursWithShortUrl();
-        
+
         if (count == 0) {
             return null;
         }
-        
+
         List<Tour> tours = tourRepository.findAllWithShortUrl();
         int randomIndex = random.nextInt(tours.size());
-        
+
         return tourMapper.toShortDTO(tours.get(randomIndex));
     }
-    
+
     /**
      * Tìm tour theo vùng miền
      */
@@ -185,7 +193,7 @@ public class TourService {
         return tourRepository.findByRegion(region, pageable)
                 .map(tourMapper::toResponseDTO);
     }
-    
+
     /**
      * Tìm tour theo tỉnh
      */
@@ -194,7 +202,7 @@ public class TourService {
         return tourRepository.findByProvince(province, pageable)
                 .map(tourMapper::toResponseDTO);
     }
-    
+
     /**
      * Tìm tour theo danh mục
      */
@@ -203,7 +211,7 @@ public class TourService {
         return tourRepository.findByCategory(category, pageable)
                 .map(tourMapper::toResponseDTO);
     }
-    
+
     /**
      * Tìm tour có thể đặt
      */
@@ -271,13 +279,15 @@ public class TourService {
 
         return new PageImpl<>(pageContent, pageable, scored.size());
     }
+
     // Helper methods
-    
     private void validateTourDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null) {
+            throw new BadRequestException("Ngày bắt đầu và kết thúc không được để trống");
+        }
         if (endDate.isBefore(startDate)) {
             throw new BadRequestException("Ngày kết thúc phải sau ngày bắt đầu");
         }
-        
         if (startDate.isBefore(LocalDate.now())) {
             throw new BadRequestException("Ngày bắt đầu phải là ngày trong tương lai");
         }
